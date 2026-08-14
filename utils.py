@@ -1,15 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import numba
 from numba import njit
 from scipy.ndimage import convolve, generate_binary_structure
 import imageio.v2 as imageio
 
 def generate_lattice(L, ratio=0.5):
-    init_random = np.random.random((L,L))
-    lattice = np.zeros((L, L))
-    lattice[init_random<=ratio] = 1
-    lattice[init_random>ratio] = -1
+    lattice = np.ones((L, L), dtype=np.int8)
+    lattice[np.random.random((L, L)) > ratio] = -1
 
     return lattice
 
@@ -25,7 +22,7 @@ def get_energy(lattice, H=0.0):
 
 
 # numba speeds up the iterations to almost C speed
-@numba.njit 
+@njit 
 def metropolis(lattice, steps, BJ, H, energy, save_every=None):
     L = lattice.shape[0]
     if L != lattice.shape[1]:
@@ -39,13 +36,14 @@ def metropolis(lattice, steps, BJ, H, energy, save_every=None):
     else:
         frames = None
 
-    net_spins = np.zeros(steps-1)
-    net_energies = np.zeros(steps-1)
+    net_spins = np.zeros(steps)
+    net_energies = np.zeros(steps)
 
     # 1. call current state mu
     lattice = lattice.copy()
+    net_spin = lattice.sum()
 
-    for t in range(0, steps-1):
+    for t in range(0, steps):
 
         # 2. pick random spins and flip it
         x = np.random.randint(0,L)
@@ -63,14 +61,12 @@ def metropolis(lattice, steps, BJ, H, energy, save_every=None):
         dE = 2 * spin * (neighbour_sum + H)
 
         # 3 / 4. change state with designated probabilities
-        if dE <= 0:
+        if dE <= 0 or np.random.random() < np.exp(-BJ * dE):
             lattice[x, y] *= -1
             energy += dE
-        elif np.random.random() < np.exp(-BJ * dE):
-            lattice[x, y] *= -1
-            energy += dE
+            total_spin -= 2 * spin
             
-        net_spins[t] = lattice.sum()
+        net_spins[t] = net_spin
         net_energies[t] = energy
 
         if save_every is not None and (t+1) % save_every == 0:
@@ -88,7 +84,7 @@ def make_gif(frames, filename="ising_evolution.gif", fps=16):
         ax.imshow(frame, cmap="binary", vmin=-1, vmax=1)
         ax.set_xticks([])
         ax.set_yticks([])
-        plt.tight_layout()
+        fig.tight_layout()
 
         # draw canvas and extract image
         fig.canvas.draw()
