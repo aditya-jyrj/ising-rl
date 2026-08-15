@@ -64,7 +64,7 @@ def metropolis(lattice, steps, BJ, H, energy, save_every=None):
         if dE <= 0 or np.random.random() < np.exp(-BJ * dE):
             lattice[x, y] *= -1
             energy += dE
-            total_spin -= 2 * spin
+            net_spin -= 2 * spin
             
         net_spins[t] = net_spin
         net_energies[t] = energy
