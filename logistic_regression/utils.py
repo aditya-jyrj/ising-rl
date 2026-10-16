@@ -12,3 +12,30 @@ def cross_entropy(P, y):
     N = len(y)
     correct_probabilities = P[np.arange(N), y]
     return -np.mean(np.log(correct_probabilities))
+
+def train(X, y, learning_rate=0.3, epochs=500, lam=0):
+    N, num_features = X.shape
+    num_classes = 10
+
+    W = np.zeros((num_features, num_classes))
+    b = np.zeros(num_classes)
+
+    Y = np.zeros((N, num_classes))
+    Y[np.arange(N), y] = 1
+
+    for epoch in range(epochs):
+        Z = X @ W + b
+        P = softmax(Z)
+
+        error = P - Y
+        dW = X.T @ error / N + lam * W
+        db = np.mean(error, axis=0)
+
+        W -= learning_rate * dW
+        b -= learning_rate * db
+
+    return W, b
+
+def predict(X, W, b):
+    Z = X @ W + b
+    return np.argmax(Z, axis=1)
