@@ -1,0 +1,2 @@
+- Temperature is now measured as $\tilde T = k_B T / J = 1/\beta J$, whereas in previous implementations it was measured as $\tilde T = \beta J$. I made this change as $\tilde T \propto T$ which feels more intuitive to me. This also means that the extra hyperparameter $\beta\alpha$ is now $\alpha/J$.
+- In the current implementation. the computation of structure factor is hard-coded to remove the central pixel, which is simply total magnetisation. This can be undone in the next stage.
