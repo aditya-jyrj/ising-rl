@@ -44,9 +44,6 @@ def predict(X, W, b):
     Z = X @ W + b
     return np.argmax(Z, axis=1)
 
-def image_to_magnetic_field(image, alpha_over_J):
-    return alpha_over_J * (2 * image - 1)
-
 
 
 # ISING METROPOLIS FUNCTIONS
@@ -91,3 +88,28 @@ def structure_factor(lattice):
     S_k[S_k.shape[0] // 2, S_k.shape[1] // 2] = 0
 
     return S_k
+
+
+# CONVERSION FUNCTIONS
+
+def image_to_magnetic_field(image, alpha_over_J):
+    return alpha_over_J * (2 * image - 1)
+
+def ising_features(image, T, alpha_over_J, sweeps=10000, n_samples=100, interval=10, L=28):
+    image = image.reshape(L, L)
+    H = image_to_magnetic_field(image, alpha_over_J)
+    lattice = generate_lattice(L)
+
+    # Reach thermal equilibrium
+    lattice = metropolis(lattice, sweeps, T, H)
+
+    # Average the structure factor over equilibrium configurations
+    S_avg = np.zeros((L, L))
+
+    for _ in range(n_samples):
+        lattice = metropolis(lattice, interval, T, H)
+        S_avg += structure_factor(lattice)
+
+    S_avg /= n_samples
+
+    return S_avg.flatten()
