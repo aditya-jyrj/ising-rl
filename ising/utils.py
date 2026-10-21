@@ -95,3 +95,8 @@ def make_gif(frames, filename="ising_evolution.gif", fps=16):
         plt.close(fig)
 
     imageio.mimsave(filename, images, fps=fps)
+
+def structure_factor(lattice):
+    spin_k = np.fft.fft2(lattice)
+    S_k = np.abs(spin_k)**2
+    return np.fft.fftshift(S_k)
