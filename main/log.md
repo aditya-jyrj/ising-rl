@@ -5,3 +5,8 @@
   - Measure structure factor every 10 sweeps for a total of 100 times
   - Store average structure factor
   It may be better to run a separate simulation for each measurement of structure factor, but presently converting the whole dataset takes 5-6 hours. This improvement can be implemented at a later date.
+
+  Data files:
+  - `10000_100_10.npz`: 10000 sweeps, 100 structure factor measurements with intervals of 10 sweeps
+  - `5000_100_50.npz`: 5000 sweeps, 100 structure factor measurements with intervals of 50 sweeps
+  - 
