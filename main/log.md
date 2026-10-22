@@ -9,4 +9,3 @@
   Data files:
   - `10000_100_10.npz`: 10000 sweeps, 100 structure factor measurements with intervals of 10 sweeps
   - `5000_100_50.npz`: 5000 sweeps, 100 structure factor measurements with intervals of 50 sweeps
-  - 
