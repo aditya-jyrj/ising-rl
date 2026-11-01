@@ -75,7 +75,7 @@ def generate_lattice(L, ratio=0.5):
     return lattice
 
 @njit 
-def metropolis(lattice, sweeps, T, H):
+def metropolis(lattice, sweeps, BJ, H):
     L = lattice.shape[0]
     lattice = lattice.copy()
 
@@ -91,10 +91,10 @@ def metropolis(lattice, sweeps, T, H):
             + lattice[x, (y - 1) % L]
             + lattice[x, (y + 1) % L]
         )
-        dE = 2 * spin * (neighbour_sum + H[x, y])
+        dE = 2 * spin * (BJ * neighbour_sum + H[x, y])
 
         # 3 / 4. change state with designated probabilities
-        if dE <= 0 or np.random.random() < np.exp(-dE / T):
+        if dE <= 0 or np.random.random() < np.exp(-dE):
             lattice[x, y] *= -1
             
     return lattice
@@ -112,22 +112,22 @@ def structure_factor(lattice):
 
 # CONVERSION FUNCTIONS
 
-def image_to_magnetic_field(image, alpha_over_J):
-    return alpha_over_J * (2 * image - 1)
+def image_to_magnetic_field(image, Balpha):
+    return Balpha * (2 * image - 1)
 
-def ising_features(image, T, alpha_over_J, sweeps=10000, n_samples=100, interval=10, L=28):
+def ising_features(image, BJ, Balpha, sweeps=10000, n_samples=100, interval=10, L=28):
     image = image.reshape(L, L)
-    H = image_to_magnetic_field(image, alpha_over_J)
+    H = image_to_magnetic_field(image, Balpha)
     lattice = generate_lattice(L)
 
     # Reach thermal equilibrium
-    lattice = metropolis(lattice, sweeps, T, H)
+    lattice = metropolis(lattice, sweeps, BJ, H)
 
     # Average the structure factor over equilibrium configurations
     S_avg = np.zeros((L, L))
 
     for _ in range(n_samples):
-        lattice = metropolis(lattice, interval, T, H)
+        lattice = metropolis(lattice, interval, BJ, H)
         S_avg += structure_factor(lattice)
 
     S_avg /= n_samples
