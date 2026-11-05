@@ -23,8 +23,7 @@ X, y = fetch_openml(
 X = X.astype(float) / 255
 y = y.astype(int)
 
-# Use 1000 images initially to test the script
-n_images = 1000
+n_images = len(X)
 
 os.makedirs("datasets", exist_ok=True)
 
@@ -41,7 +40,7 @@ for BJ in BJ_values:
 
     start = time.perf_counter()
 
-    X_ising = np.zeros((n_images, 784))
+    X_ising = np.zeros((n_images, 784), dtype=np.float32)
 
     for i in range(n_images):
         X_ising[i] = ut.ising_features(
